@@ -149,7 +149,6 @@ Component<AgentConfigPageData, any, any, any, any, true>({
       const { key } = e.currentTarget.dataset
       const label = e.detail.label.join(' ')
       const value = e.detail.value
-      console.log('picker change: ', e.detail, label, value)
 
       this.setData({ [`${key}PickerVisible`]: false });
       switch (key) {

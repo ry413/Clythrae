@@ -1,8 +1,4 @@
 <view>
-  <!-- <view class="title" style="text-align: center; font-size: large;">
-    <text>此时如果设备在线可预览效果</text>
-  </view> -->
-
   <view class="title"><text>主页配置</text></view>
 
   <view class="card">
@@ -11,48 +7,163 @@
       bind:click="showDialog" />
     <ry-dialog visible="{{showClockPositionDialog}}" bind:confirm="confirmClockPosition"
       bind:cancel="cancelClockPosition">
-      <t-grid column="3">
-        <t-grid-item wx:for="{{clockPositionGridList}}" wx:key="id" text="{{item.text}}" data-id="{{item.text}}"
-          class="{{item.text === tempClockPosition ? 'grid-item selected' : 'grid-item'}}"
-          bindtap="onClockPostionItemTap" />
+      <view class="dialog-title">选择时钟位置</view>
+      <t-grid column="3" class="clock-grid" theme="card">
+        <t-grid-item wx:for="{{clockPositionGridList}}" wx:key="id" data-id="{{item.text}}"
+          class="{{item.text === tempClockPosition ? 'clock-grid-item selected' : 'clock-grid-item'}}"
+          bindtap="onClockPostionItemTap">
+          <view class="clock-grid-square">
+            <text class="clock-grid-label">{{item.text}}</text>
+          </view>
+        </t-grid-item>
       </t-grid>
       <view class="input-row">
-        <t-input style="background-color: #f7f7f7;" type='number' label="X偏移" placeholder="0"
+        <text class="input-label">X偏移</text>
+        <t-input class="offset-input" style="background-color: #f7f7f7;" type='number' placeholder="0"
           value="{{tempClockOffsetX}}" bindchange="onInputOffsetX" />
-        <t-input style="background-color: #f7f7f7;" type='number' label="Y偏移" placeholder="0"
+        <text class="input-label">Y偏移</text>
+        <t-input class=" offset-input" style="background-color: #f7f7f7;" type='number' placeholder="0"
           value="{{tempClockOffsetY}}" bindchange="onInputOffsetY" />
       </view>
     </ry-dialog>
 
     <!-- 时钟颜色 -->
-    <t-cell title="时钟颜色" arrow hover note="{{clockColor}}" data-key="showClockColorDialog" bind:click="showDialog" />
-    <t-color-picker visible="{{showClockColorDialog}}" value="{{tempClockColor}}" use-popup enableAlpha type="multiple" format="HEX" swatch-colors="{{clockSwatchColors}}"
-      bind:change="onChange" bind:close="cancelClockColor" >
+    <t-cell title="时钟颜色" arrow hover data-key="showClockColorDialog" bind:click="showDialog">
+      <view slot="note" class="color-note">
+        <view class="color-swatch" style="background-color: {{clockColor}};" />
+        <text class="color-text">{{clockColor}}</text>
+      </view>
+    </t-cell>
+    <t-color-picker visible="{{showClockColorDialog}}" value="{{tempClockColor}}" use-popup enableAlpha type="multiple"
+      format="HEX" swatch-colors="{{clockSwatchColors}}" bind:change="onChange" bind:close="cancelClockColor">
       <view slot="header" class="dialog-footer">
         <button class="cancel" bindtap="cancelClockColor">取消</button>
         <button class="confirm" bindtap="confirmClockColor">确认</button>
       </view>
     </t-color-picker>
 
-    <t-cell title="时钟字体" arrow hover note="asdads" />
-    <t-cell title="天气显示" arrow hover note="asdads" />
+    <!-- 时钟字体 -->
+    <t-cell title="时钟字体" arrow hover bind:click="onClockFontOpen">
+      <view slot="note" class="color-note">
+        <text class="color-text">{{clockFontLabel || clockFontValue || '未选择'}}</text>
+      </view>
+    </t-cell>
+    <t-picker visible="{{showClockFontPicker}}" value="{{clockFontValue ? [clockFontValue] : []}}" title="选择时钟字体"
+      cancelBtn="取消" confirmBtn="确认" usingCustomNavbar bind:confirm="onClockFontConfirm"
+      bind:cancel="onClockFontCancel">
+      <t-picker-item options="{{clockFontOptions}}" />
+    </t-picker>
+
+    <!-- 天气显示 -->
+    <t-cell title="天气显示" arrow hover data-key="showWeatherDisplayDialog" bind:click="showDialog">
+      <view slot="note" class="color-note">
+        <text class="color-text">{{weatherPositionLabel || '未设置'}} 间距{{weatherSpacingValue}}</text>
+      </view>
+    </t-cell>
+    <ry-dialog visible="{{showWeatherDisplayDialog}}" bind:confirm="confirmWeatherDisplay"
+      bind:cancel="cancelWeatherDisplay">
+      <view class="dialog-title">天气显示设置</view>
+      <view class="section-title">显示位置</view>
+      <t-grid column="3" class="weather-position-grid" theme="card">
+        <t-grid-item wx:for="{{weatherPositionOptions}}" wx:key="value" data-value="{{item.value}}"
+          class="{{item.value === tempWeatherPositionValue ? 'weather-position-item selected' : 'weather-position-item'}}"
+          bindtap="onWeatherPositionTap">
+          <view class="weather-position-box">
+            <text class="weather-position-icon">{{item.icon}}</text>
+            <text class="weather-position-label">{{item.label}}</text>
+          </view>
+        </t-grid-item>
+      </t-grid>
+
+      <view class="section-title">显示间距</view>
+      <t-grid column="5" class="weather-spacing-grid">
+        <t-grid-item wx:for="{{weatherSpacingOptions}}" wx:key="item" data-value="{{item}}"
+          class="{{item === tempWeatherSpacingValue ? 'weather-spacing-item selected' : 'weather-spacing-item'}}"
+          bindtap="onWeatherSpacingTap">
+          <view class="weather-spacing-box">
+            <text class="weather-spacing-text">{{item}}</text>
+          </view>
+        </t-grid-item>
+      </t-grid>
+
+      <view class="input-row">
+        <text class="input-label">X偏移</text>
+        <t-input class="offset-input" style="background-color: #f7f7f7;" type='number' placeholder="0"
+          value="{{tempWeatherOffsetX}}" bindchange="onWeatherOffsetX" />
+        <text class="input-label">Y偏移</text>
+        <t-input class="offset-input" style="background-color: #f7f7f7;" type='number' placeholder="0"
+          value="{{tempWeatherOffsetY}}" bindchange="onWeatherOffsetY" />
+      </view>
+    </ry-dialog>
+
+    <!-- TODO: 天气定位 -->
     <t-cell title="天气定位" arrow hover note="asdads" />
   </view>
 
   <view class="title"><text>个性配置</text></view>
   <view class="card">
+    <!-- TODO: 壁纸选择 -->
     <t-cell title="壁纸选择" arrow hover note="asdads" />
-    <t-cell title="切换间隔" arrow hover note="asdads" />
-    <t-cell title="切换模式" arrow hover note="asdads" />
-    <t-cell title="本地音乐结束后" arrow hover note="asdads" />
+
+    <!-- 壁纸切换间隔 -->
+    <t-cell title="切换间隔" arrow hover note="{{switchIntervalLabel || '未选择'}}" data-key="switchInterval"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{switchIntervalPickerVisible}}" value="{{switchIntervalValue ? [switchIntervalValue] : []}}"
+      data-key="switchInterval" title="切换间隔" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{switchIntervalOptions}}" />
+    </t-picker>
+
+    <!-- 壁纸切换模式 -->
+    <t-cell title="切换模式" arrow hover note="{{switchModeLabel || '未选择'}}" data-key="switchMode"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{switchModePickerVisible}}" value="{{switchModeValue ? [switchModeValue] : []}}"
+      data-key="switchMode" title="切换模式" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{switchModeOptions}}" />
+    </t-picker>
+
+    <!-- 本地音乐播放结束后 -->
+    <t-cell title="本地音乐结束后" arrow hover note="{{localMusicEndLabel || '未选择'}}" data-key="localMusicEnd"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{localMusicEndPickerVisible}}" value="{{localMusicEndValue ? [localMusicEndValue] : []}}"
+      data-key="localMusicEnd" title="本地音乐结束后" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{localMusicEndOptions}}" />
+    </t-picker>
+
+    <!-- 在线音乐播放结束后 -->
     <t-cell title="在线音乐结束后" arrow hover note="asdads" />
   </view>
 
   <view class="title"><text>系统设置</text></view>
   <view class="card">
-    <t-cell title="音乐播放时" arrow hover note="asdads" />
-    <t-cell title="熄屏时间" arrow hover note="asdads" />
-    <t-cell title="自动关机" arrow hover note="asdads" />
+    <!-- 音乐播放时 -->
+    <t-cell title="音乐播放时" arrow hover note="{{musicDuringLabel || '未选择'}}" data-key="musicDuring"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{musicDuringPickerVisible}}" value="{{musicDuringValue ? [musicDuringValue] : []}}"
+      data-key="musicDuring" title="音乐播放时" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{musicDuringOptions}}" />
+    </t-picker>
+
+    <!-- 熄屏时间 -->
+    <t-cell title="熄屏时间" arrow hover note="{{screenOffTimeLabel || '未选择'}}" data-key="screenOffTime"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{screenOffTimePickerVisible}}" value="{{screenOffTimeValue ? [screenOffTimeValue] : []}}"
+      data-key="screenOffTime" title="熄屏时间" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{screenOffTimeOptions}}" />
+    </t-picker>
+
+    <!-- 自动关机时间 -->
+    <t-cell title="自动关机" arrow hover note="{{autoPowerOffLabel || '未选择'}}" data-key="autoPowerOff"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{autoPowerOffPickerVisible}}" value="{{autoPowerOffValue ? [autoPowerOffValue] : []}}"
+      data-key="autoPowerOff" title="自动关机" cancelBtn="取消" confirmBtn="确认" usingCustomNavbar
+      bind:confirm="onSimplePickerConfirm" bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{autoPowerOffOptions}}" />
+    </t-picker>
 
     <t-cell title="恢复默认" arrow hover note="asdads" />
   </view>

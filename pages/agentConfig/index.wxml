@@ -32,7 +32,7 @@
         <t-cell class="mb-16" title="大语言模型" arrow hover note="{{displayNames.LLM}}" bind:click="onPickerOpen"
           data-key="llm" />
         <t-picker visible="{{llmPickerVisible}}" value="{{[agentForm.llmModelId]}}" data-key="llm" title="选择大模型"
-          cancelBtn="取消" confirmBtn="确认" usingCustomNavbar bindchange="onPickerConfirm" bindcancel="onPickerCancel">
+          cancelBtn="取消" confirmBtn="确认" usingCustomNavbar bind:confirm="onPickerConfirm" bind:cancel="onPickerCancel">
           <t-picker-item options="{{modelOptions.LLM}}" />
         </t-picker>
 
