@@ -1,0 +1,12 @@
+<view class="agent-item">
+  <text>{{agent.agentName}}</text>
+
+  <view class="agent-name">
+    <text>{{agent.llmModelName}}</text>
+  </view>
+  <view class="agent-name">
+    <text>{{agent.ttsModelName}} ({{agent.ttsVoiceName}})</text>
+  </view>
+
+  <text>最近对话: {{agent.lastConnectedAt}}</text>
+</view>

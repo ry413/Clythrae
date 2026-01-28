@@ -1,0 +1,28 @@
+<t-navbar title="我的设备" fixed="{{false}}" placeholder t-class-title="nav-title" />
+<view class="home-container">
+  <view class="home-content">
+    <t-pull-down-refresh value="{{refreshEnable}}" bind:refresh="onRefresh"
+      loadingTexts="{{['下拉刷新', '松手刷新', '正在刷新', '刷新完成']}}">
+      <view class="home-card-list">
+        <agent-item wx:for="{{isDevtools ? mockAgents : agents}}" wx:key="index" agent="{{item}}" data-agent-id="{{item.agentId}}"
+          bind:tap="goToAgentConfigPage" />
+      </view>
+    </t-pull-down-refresh>
+  </view>
+</view>
+
+<view class="home-release">
+  <t-dialog visible="{{showActiveCodeInputDialog}}" title="验证码绑定" confirm-btn="确定" cancel-btn="取消"
+    bind:confirm="onActiveCodeConfirm" bind:cancel="closeActiveCodeDialog">
+    <t-input borderless style="background-color:rgb(201, 214, 214);" clearable slot="content"
+      placeholder="请输入设备播报的6位数验证码" type='number' focus maxlength='6' value="{{activeCode}}"
+      bind:change="onActiveCodeChange" />
+  </t-dialog>
+
+  <!-- <button open-type="openSetting" bindopensetting="callback">打开权限页</button> -->
+  <t-action-sheet id="t-action-sheet" usingCustomNavbar bind:selected="handleAddActionSelected" />
+
+  <t-button theme="primary" size="large" icon="add" shape="circle" bindtap="handleAddAction"></t-button>
+</view>
+
+<t-message id="t-message" />

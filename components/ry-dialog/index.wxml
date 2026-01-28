@@ -1,0 +1,14 @@
+<!-- 遮罩层 -->
+<view wx:if="{{visible}}" class="dialog-mask" catchtap="onMaskTap"></view>
+
+<!-- 弹窗内容 -->
+<view wx:if="{{visible}}" class="dialog-box">
+  <!-- 插槽：内容可自由插入 -->
+  <slot></slot>
+
+  <!-- 底部操作栏 -->
+  <view class="dialog-footer">
+    <button class="cancel" bindtap="onCancel">取消</button>
+    <button class="confirm" bindtap="onConfirm">确认</button>
+  </view>
+</view>

@@ -1,0 +1,80 @@
+page {
+  background-color: #f8f8f8;
+}
+.container {
+  padding: 0 30rpx 0 30rpx;
+  align-items: center;
+}
+.list-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0 10px 0;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  border-style: none none solid none;
+  border-bottom-color: lightgray;
+}
+.list-item:last-child {
+  border-style: none;
+}
+.button {
+  position: fixed;
+  width: 690rpx;
+  bottom: 30rpx;
+}
+.steps{
+  width: 690rpx;
+  padding: 20rpx;
+  margin-bottom: 12rpx;
+  border-radius: 16rpx;
+  background: #fff;
+}
+
+.step{
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.dot-wrap{
+  width: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dot{
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #cfcfcf;
+  margin-top: 4rpx;
+}
+
+.line{
+  width: 2rpx;
+  flex: 1;
+  background: #e6e6e6;
+  margin-top: 6rpx;
+  margin-bottom: 6rpx;
+}
+
+.step-content{
+  flex: 1;
+  padding-bottom: 18rpx;
+}
+
+.step-title{
+  font-size: 28rpx;
+  color: #222;
+}
+
+.step-desc{
+  display: block;
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 6rpx;
+}

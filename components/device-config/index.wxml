@@ -1,0 +1,60 @@
+<view>
+  <!-- <view class="title" style="text-align: center; font-size: large;">
+    <text>此时如果设备在线可预览效果</text>
+  </view> -->
+
+  <view class="title"><text>主页配置</text></view>
+
+  <view class="card">
+    <!-- 时钟位置 -->
+    <t-cell title="时钟位置" arrow hover note="{{clockPosition}}" data-key="showClockPositionDialog"
+      bind:click="showDialog" />
+    <ry-dialog visible="{{showClockPositionDialog}}" bind:confirm="confirmClockPosition"
+      bind:cancel="cancelClockPosition">
+      <t-grid column="3">
+        <t-grid-item wx:for="{{clockPositionGridList}}" wx:key="id" text="{{item.text}}" data-id="{{item.text}}"
+          class="{{item.text === tempClockPosition ? 'grid-item selected' : 'grid-item'}}"
+          bindtap="onClockPostionItemTap" />
+      </t-grid>
+      <view class="input-row">
+        <t-input style="background-color: #f7f7f7;" type='number' label="X偏移" placeholder="0"
+          value="{{tempClockOffsetX}}" bindchange="onInputOffsetX" />
+        <t-input style="background-color: #f7f7f7;" type='number' label="Y偏移" placeholder="0"
+          value="{{tempClockOffsetY}}" bindchange="onInputOffsetY" />
+      </view>
+    </ry-dialog>
+
+    <!-- 时钟颜色 -->
+    <t-cell title="时钟颜色" arrow hover note="{{clockColor}}" data-key="showClockColorDialog" bind:click="showDialog" />
+    <t-color-picker visible="{{showClockColorDialog}}" value="{{tempClockColor}}" use-popup enableAlpha type="multiple" format="HEX" swatch-colors="{{clockSwatchColors}}"
+      bind:change="onChange" bind:close="cancelClockColor" >
+      <view slot="header" class="dialog-footer">
+        <button class="cancel" bindtap="cancelClockColor">取消</button>
+        <button class="confirm" bindtap="confirmClockColor">确认</button>
+      </view>
+    </t-color-picker>
+
+    <t-cell title="时钟字体" arrow hover note="asdads" />
+    <t-cell title="天气显示" arrow hover note="asdads" />
+    <t-cell title="天气定位" arrow hover note="asdads" />
+  </view>
+
+  <view class="title"><text>个性配置</text></view>
+  <view class="card">
+    <t-cell title="壁纸选择" arrow hover note="asdads" />
+    <t-cell title="切换间隔" arrow hover note="asdads" />
+    <t-cell title="切换模式" arrow hover note="asdads" />
+    <t-cell title="本地音乐结束后" arrow hover note="asdads" />
+    <t-cell title="在线音乐结束后" arrow hover note="asdads" />
+  </view>
+
+  <view class="title"><text>系统设置</text></view>
+  <view class="card">
+    <t-cell title="音乐播放时" arrow hover note="asdads" />
+    <t-cell title="熄屏时间" arrow hover note="asdads" />
+    <t-cell title="自动关机" arrow hover note="asdads" />
+
+    <t-cell title="恢复默认" arrow hover note="asdads" />
+  </view>
+
+</view>

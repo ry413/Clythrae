@@ -1,0 +1,37 @@
+<view class="container">
+  <view class="steps">
+    <block wx:for="{{steps}}" wx:key="key">
+      <view class="step">
+        <view class="dot-wrap">
+          <icon wx:if="{{item.status === 'done'}}" type="success" size="18"></icon>
+          <icon wx:elif="{{item.status === 'doing'}}" type="waiting" size="18"></icon>
+          <icon wx:elif="{{item.status === 'error'}}" type="cancel" size="18"></icon>
+          <view wx:else class="dot"></view>
+
+          <view wx:if="{{index !== steps.length - 1}}" class="line"></view>
+        </view>
+
+        <view class="step-content">
+          <text class="step-title">{{item.title}}</text>
+          <text wx:if="{{item.desc}}" class="step-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+  <scroll-view scroll-y style="width:690rpx;height:{{list_height}}rpx">
+    <block wx:for="{{devicesList}}" wx:key="deviceId">
+      <view class="list-item" id="{{item.deviceId}}" bindtap="Connect">
+        <view style="display:flex;flex-direction:column;width:80%">
+          <text style="font-size:medium;word-break:break-all">设备名称: {{item.name}}</text>
+          <text style="font-size:x-small;color:gray;word-break:break-all">设备ID: {{item.deviceId}}</text>
+          <text style="font-size:x-small;color:gray;word-break:break-all">信号强度RSSI: {{item.RSSI}}</text>
+        </view>
+        <image style="width:36px;height:36px" mode="aspectFit" src="/images/bluetooth.png"></image>
+      </view>
+    </block>
+  </scroll-view>
+
+  <button type="primary" class="button" loading="{{searching}}">
+    {{searching?"搜索中...":"搜索蓝牙设备"}}
+  </button>
+</view>
