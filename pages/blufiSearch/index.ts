@@ -31,7 +31,6 @@ Component<BlufiSearchPageData, any, any, any, any, true>({
   },
   lifetimes: {
     attached() {
-      console.log('helloooooooo')
       xBlufi.initXBlufi(xBlufi.XMQTT_SYSTEM.WeChat);
 
       this._onBlufiMsg = (options: any) => this.funListenDeviceMsgEvent(options);

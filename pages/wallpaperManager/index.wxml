@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="header">
+    <view class="header-text">
+      <text class="title">壁纸管理</text>
+      <text class="subtitle">选择当前设备可用壁纸</text>
+    </view>
+    <t-button theme="primary" size="small" loading="{{uploading}}" disabled="{{uploading}}" bind:tap="onUploadTap">
+      上传
+    </t-button>
+  </view>
+
+  <view wx:if="{{loading}}" class="status-text">加载中...</view>
+  <view wx:elif="{{!wallpapers.length}}" class="status-text">暂无壁纸</view>
+  <view wx:else class="wallpaper-grid">
+    <view class="wallpaper-item {{selectedIdMap[item.id] ? 'selected' : ''}}" wx:for="{{wallpapers}}" wx:key="id"
+      data-id="{{item.id}}" bindtap="toggleWallpaper">
+      <image class="wallpaper-img" src="{{item.url}}" mode="aspectFill" />
+      <view class="wallpaper-mask" wx:if="{{selectedIdMap[item.id]}}">
+        <text class="mask-text">已选</text>
+      </view>
+      <view class="delete-btn" data-id="{{item.id}}" catchtap="onDeleteWallpaper">
+        <text class="delete-text">×</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <t-button theme="primary" size="large" block loading="{{saving}}" disabled="{{saving}}"
+      bind:tap="saveSelection">
+      {{saving ? '保存中' : '保存'}}
+    </t-button>
+  </view>
+</view>
+
+<canvas
+  canvas-id="cropperCanvas"
+  class="cropper-canvas"
+  style="width: {{screenWidth}}px; height: {{screenHeight}}px;"
+  width="{{screenWidth}}"
+  height="{{screenHeight}}"
+/>

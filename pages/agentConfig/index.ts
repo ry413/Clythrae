@@ -1,6 +1,5 @@
 import Api from "~/api/api";
-import { AgentDetail, MODEL_TYPES, ModelType, ModelOption, RoleTemplate, VoiceDTO, AgentFunction, PluginDefinition } from "~/utils/types";
-import { isDevtools } from "~/utils/util";
+import { AgentDetail, MODEL_TYPES, ModelType, ModelOption, RoleTemplate, VoiceDTO, AgentFunction, PluginDefinition, DeviceEntity } from "~/utils/types";
 
 interface AgentConfigPageData {
   agentForm: Partial<AgentDetail>
@@ -12,7 +11,8 @@ interface AgentConfigPageData {
   selectedTTSAndVoiceText: string
   allFunctions: Array<PluginDefinition>
   currentFunctions: Array<PluginDefinition>
-  checkedMap: Record<string, boolean>
+  checkedFunctionMap: Record<string, boolean>
+  currentDeviceId: string
 }
 
 Component<AgentConfigPageData, any, any, any, any, true>({
@@ -51,7 +51,9 @@ Component<AgentConfigPageData, any, any, any, any, true>({
 
     allFunctions: [],
     currentFunctions: [],
-    checkedMap: {}
+    checkedFunctionMap: {},
+
+    currentDeviceId: ''
   },
   properties: {
     agentId: String
@@ -79,38 +81,23 @@ Component<AgentConfigPageData, any, any, any, any, true>({
       const set = new Set((currentFunctions || []).map((x: any) => x.id));
       const map: any = {};
       (this.data.allFunctions || []).forEach((x: any) => { map[x.id] = set.has(x.id); });
-      this.setData({ checkedMap: map });
+      this.setData({ checkedFunctionMap: map });
     },
   },
   lifetimes: {
     async attached() {
-      if (isDevtools) {
-        this.setData({
-          roleTemplates: [
-            { id: 'aaaa', agentName: 'tmp1', systemPrompt: 'cxzkdhkdhjsasdxc', summaryMemory: 'histtttt' },
-            { id: 'bbbb', agentName: 'tmp2', systemPrompt: 'bbbb' },
-            { id: 'cccc', agentName: 'tmp3', systemPrompt: 'ccc' },
-            { id: 'dddd', agentName: 'tmp4', systemPrompt: 'ddd' },
-            { id: 'eeee', agentName: 'tmp5', systemPrompt: 'eee' },
-          ],
-          modelOptions: {
-            LLM: [{ value: 'LLM_AliLLM', label: '通义千问' }, { value: 'LLM_GeminiLLM', label: '谷歌Gemini' }],
-            TTS: [{ value: "TTS_CozeCnTTS", label: "Coze中文语音合成" }]
-          }
-        })
-      } else {
-        await Promise.all([
-          this.loadRoleTemplates(),
-          this.loadModelOptions(),
-          this.loadPluginFunctions(),
-        ])
+      await Promise.all([
+        this.loadRoleTemplates(),
+        this.loadModelOptions(),
+        this.loadPluginFunctions(),
+      ])
 
-        if (this.data.agentId) {
-          await Promise.all([
-            this.loadMcpAddress(),
-            this.loadAgentDetail()
-          ])
-        }
+      if (this.data.agentId) {
+        await Promise.all([
+          this.loadMcpAddress(),
+          this.loadAgentDetail(),
+          // this.loadDeviceInfo()
+        ])
       }
     },
   },
@@ -191,10 +178,10 @@ Component<AgentConfigPageData, any, any, any, any, true>({
       }
       try {
         const list: Array<VoiceDTO> = await Api.model.getTTSVoices(ttsModelId) ?? []
-        console.log(list)
         const currVoiceOptions = list.map((item: VoiceDTO) => ({
           label: item.name, value: item.id
         }))
+        
         this.setData({ currVoiceOptions, selectedTTSAndVoiceValue: [ttsModelId, ttsVoiceId] })
       } catch (e) {
         console.error(e)
@@ -236,7 +223,6 @@ Component<AgentConfigPageData, any, any, any, any, true>({
     },
     async loadModelOptions() {
       const modelOptions = { ...this.data.modelOptions }
-
       try {
         await Promise.all(
           MODEL_TYPES.map(async (type) => {
@@ -285,6 +271,12 @@ Component<AgentConfigPageData, any, any, any, any, true>({
         }
         this.setData({ agentForm: { ...agentDetail } })
         console.log('智能体详情: ', this.data.agentForm)
+
+        // 虽然是数组, 但设计上是一智能体对应一个设备, 所以我们就当作最大只有一个项
+        const devices: Array<DeviceEntity> = await Api.device.getAgentBindDevices(this.data.agentId)
+        if (devices.length >= 1) {
+          this.setData({ currentDeviceId: devices[0].id })
+        }
 
         const savedMappings = agentDetail.functions || []
         this.setData({

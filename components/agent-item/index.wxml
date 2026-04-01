@@ -9,4 +9,8 @@
   </view>
 
   <text>最近对话: {{agent.lastConnectedAt}}</text>
+
+  <view>
+    <text>{{ deviceIsAlive ? '在线' : '离线'}}</text>
+  </view>
 </view>

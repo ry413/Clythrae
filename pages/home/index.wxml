@@ -4,7 +4,7 @@
     <t-pull-down-refresh value="{{refreshEnable}}" bind:refresh="onRefresh"
       loadingTexts="{{['下拉刷新', '松手刷新', '正在刷新', '刷新完成']}}">
       <view class="home-card-list">
-        <agent-item wx:for="{{isDevtools ? mockAgents : agents}}" wx:key="index" agent="{{item}}" data-agent-id="{{item.agentId}}"
+        <agent-item wx:for="{{agents}}" wx:key="index" agent="{{item}}" deviceIsAlive="{{item.deviceIsAlive}}"  data-agent-id="{{item.agentId}}"
           bind:tap="goToAgentConfigPage" />
       </view>
     </t-pull-down-refresh>

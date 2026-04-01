@@ -43,7 +43,7 @@
     </t-color-picker>
 
     <!-- 时钟字体 -->
-    <t-cell title="时钟字体" arrow hover bind:click="onClockFontOpen">
+    <!-- <t-cell title="时钟字体" arrow hover bind:click="onClockFontOpen">
       <view slot="note" class="color-note">
         <text class="color-text">{{clockFontLabel || clockFontValue || '未选择'}}</text>
       </view>
@@ -52,7 +52,7 @@
       cancelBtn="取消" confirmBtn="确认" usingCustomNavbar bind:confirm="onClockFontConfirm"
       bind:cancel="onClockFontCancel">
       <t-picker-item options="{{clockFontOptions}}" />
-    </t-picker>
+    </t-picker> -->
 
     <!-- 天气显示 -->
     <t-cell title="天气显示" arrow hover data-key="showWeatherDisplayDialog" bind:click="showDialog">
@@ -96,14 +96,25 @@
       </view>
     </ry-dialog>
 
-    <!-- TODO: 天气定位 -->
-    <t-cell title="天气定位" arrow hover note="asdads" />
+    <!-- 天气定位 -->
+    <t-cell title="天气定位" arrow hover note="{{weatherRegionModeLabel || '未选择'}}" data-key="weatherRegionMode"
+      bind:click="onSimplePickerOpen" />
+    <t-picker visible="{{weatherRegionModePickerVisible}}"
+      value="{{weatherRegionModeValue ? [weatherRegionModeValue] : []}}" data-key="weatherRegionMode" title="天气定位"
+      cancelBtn="取消" confirmBtn="确认" usingCustomNavbar bind:confirm="onSimplePickerConfirm"
+      bind:cancel="onSimplePickerCancel">
+      <t-picker-item options="{{weatherRegionModeOptions}}" />
+    </t-picker>
+    <picker wx:if="{{weatherRegionModeValue === 'manual'}}" mode="region" bindchange="onWeatherRegionCityChange"
+      value="{{weatherRegionRegionValue}}">
+      <t-cell title="手动定位城市" arrow hover note="{{weatherRegionCity || '请选择城市'}}" />
+    </picker>
   </view>
 
   <view class="title"><text>个性配置</text></view>
   <view class="card">
     <!-- TODO: 壁纸选择 -->
-    <t-cell title="壁纸选择" arrow hover note="asdads" />
+    <t-cell title="壁纸选择" arrow hover note="去选择" bind:click="onWallpaperSelect" />
 
     <!-- 壁纸切换间隔 -->
     <t-cell title="切换间隔" arrow hover note="{{switchIntervalLabel || '未选择'}}" data-key="switchInterval"
@@ -166,6 +177,13 @@
     </t-picker>
 
     <t-cell title="恢复默认" arrow hover note="asdads" />
+
+    <view class="full-width-button">
+      <t-button theme="primary" size="large" loading="{{saving}}" disabled="{{saving}}" block
+        bind:tap="saveDeviceParams">
+        {{functionsSaving ? '保存中' : '保存功能'}}
+      </t-button>
+    </view>
   </view>
 
 </view>

@@ -1,16 +1,12 @@
-// import Message from 'tdesign-miniprogram/message/index';
 import { AgentDTO } from '~/utils/types';
 import Api from '~/api/api';
 import { ActionSheet, ActionSheetTheme } from "tdesign-miniprogram/";
-import { isDevtools } from '~/utils/util'
 
 interface AgentPageData {
-  agents: Array<AgentDTO & { agentId: string }>
+  agents: Array<AgentDTO & { agentId: string, deviceId: string, deviceIsAlive: boolean }>
   actionSheetHidden: boolean
   showActiveCodeInputDialog: boolean
   activeCode: string
-  mockAgents: Array<AgentDTO & { agentId: string }>
-  isDevtools: boolean
   refreshEnable: boolean
 }
 
@@ -20,21 +16,6 @@ Component<AgentPageData, any, any, any, any, true>({
     actionSheetHidden: true,
     showActiveCodeInputDialog: false,
     activeCode: '',
-    mockAgents: [{
-      id: 'agent_id_asldjwdkljaskldjs',
-      agentId: 'agent_id_asldjwdkljaskldjs',
-      agentName: 'Xiaozhi-1234',
-      ttsModelName: 'ttsModelName',
-      ttsVoiceName: 'ttsVoiceName',
-      llmModelName: 'llmModelName',
-      vllmModelName: 'vllmModelName',
-      summaryMemory: 'summaryMemory',
-      memModelId: 'memModelId',
-      systemPrompt: 'systemPrompt',
-      lastConnectedAt: 'lastConnectedAt',
-      deviceCount: 1
-    }],
-    isDevtools,
     refreshEnable: false
   },
   pageLifetimes: {
@@ -233,17 +214,34 @@ Component<AgentPageData, any, any, any, any, true>({
       })
     },
     async fetchAgentList() {
-      // 删除可能不知道什么时候残留的无设备绑定的智能体
       try {
-        const list = await Api.agent.getAgentList()
-        const toDelete = list.filter(agent => agent.deviceCount === 0)
-        const toKeep = list
-          .filter(agent => agent.deviceCount !== 0)
-          .map(agent => ({
-            ...agent,
-            agentId: agent.id
-          }))
+        const agentList = await Api.agent.getAgentList()
+        // 删除可能不知道什么时候残留的无设备绑定的智能体
+        const toDelete = agentList.filter(agent => agent.deviceCount === 0)
+        let toKeep = await Promise.all(
+          agentList.filter(agent => agent.deviceCount !== 0)
+            .map(async agent => {
+              try {
+                const status = await Api.device.getDeviceStatus(agent.id)
+                const statusInfo: any = Object.values(JSON.parse(status))[0];
 
+                let isOnline = false;
+                if (statusInfo.isAlive === true) {
+                  isOnline = true;
+                } else if (statusInfo.isAlive === false) {
+                  isOnline = false;
+                } else if (statusInfo.isAlive === null && statusInfo.exists === true) {
+                  isOnline = true;
+                } else {
+                  isOnline = false;
+                }
+
+                return { ...agent, agentId: agent.id, deviceIsAlive: isOnline }
+              } catch {
+                return { ...agent, agentId: agent.id, deviceIsAlive: false }
+              }
+            })
+        )
         this.setData({ agents: toKeep })
 
         await Promise.all(
@@ -251,7 +249,7 @@ Component<AgentPageData, any, any, any, any, true>({
         )
       } catch (e) {
         console.log('获取智能体列表失败: ', e)
-        wx.showToast({ title: '获取列表失败', icon: 'error'})
+        wx.showToast({ title: '获取列表失败', icon: 'error' })
       }
     },
     goToAgentConfigPage(e: WechatMiniprogram.TouchEvent) {

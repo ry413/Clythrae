@@ -22,4 +22,4 @@ export const getLocalUrl = (path, name) => {
   return tempFileName;
 };
 
-export const isDevtools = (() => wx.getDeviceInfo().platform === 'devtools')()
+// export const isDevtools = (() => wx.getDeviceInfo().platform === 'devtools')()

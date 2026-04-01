@@ -1,3 +1,4 @@
+import Api from "~/api/api";
 
 Component({
   data: {
@@ -7,19 +8,19 @@ Component({
       { text: '顶部居左' },
       { text: '顶部居中' },
       { text: '顶部居右' },
-      { text: '中部局左' },
-      { text: '中部居中' },
-      { text: '中部居右' },
+      { text: '中间居左' },
+      { text: '中间居中' },
+      { text: '中间居右' },
       { text: '底部居左' },
       { text: '底部居中' },
       { text: '底部居右' },
     ],
     clockPosition: '',
-    clockOffsetX: 0,
-    clockOffsetY: 0,
+    clockOffsetX: '0',
+    clockOffsetY: '0',
     tempClockPosition: '',
-    tempClockOffsetX: 0,
-    tempClockOffsetY: 0,
+    tempClockOffsetX: '0',
+    tempClockOffsetY: '0',
 
     clockSwatchColors: [
       '#000000', '#FFFFFF', '#00FFFF', '#FF00FF', '#FFFF00',
@@ -44,18 +45,28 @@ Component({
       { label: '时钟上方', value: 'above', icon: '↑' },
       { label: '时钟下方', value: 'below', icon: '↓' },
     ],
-    weatherSpacingOptions: [0, 2, 4, 6, 8, 10, 12, 16, -2, -4],
+    weatherSpacingOptions: ['0', '2', '4', '6', '8', '10', '12', '16', '-2', '-4'],
     weatherPositionValue: '',
     weatherPositionLabel: '',
-    weatherSpacingValue: 0,
-    weatherOffsetX: 0,
-    weatherOffsetY: 0,
+    weatherSpacingValue: '0',
+    weatherOffsetX: '0',
+    weatherOffsetY: '0',
     tempWeatherPositionValue: '',
     tempWeatherPositionLabel: '',
-    tempWeatherSpacingValue: 0,
-    tempWeatherOffsetX: 0,
-    tempWeatherOffsetY: 0,
+    tempWeatherSpacingValue: '0',
+    tempWeatherOffsetX: '0',
+    tempWeatherOffsetY: '0',
+
     weatherRegion: '',
+    weatherRegionModeOptions: [
+      { label: '自动', value: 'auto' },
+      { label: '手动', value: 'manual' },
+    ],
+    weatherRegionModeValue: 'auto',
+    weatherRegionModeLabel: '自动',
+    weatherRegionModePickerVisible: false,
+    weatherRegionRegionValue: ['', '', ''],
+    weatherRegionCity: '',
 
     switchIntervalOptions: [
       { label: '不自动切换', value: 'none' },
@@ -135,15 +146,139 @@ Component({
 
   },
   properties: {
+    deviceId: String
+  },
 
+  lifetimes: {
+    ready() {
+      this.requestDeviceParams()
+    }
   },
   methods: {
+    async sendPreviewCommand() {
+      try {
+        await Api.device.executeMcpTools(this.data.deviceId, 'self.device_params.preview', {
+          params_json: JSON.stringify(
+            {
+              "clockPosition": this.data.clockPosition,
+              "clockOffsetX": this.data.clockOffsetX,
+              "clockOffsetY": this.data.clockOffsetY,
+              "clockColor": this.data.clockColor,
+              "weatherPosition": this.data.weatherPositionValue,
+              "weatherSpacing": this.data.weatherSpacingValue,
+              "weatherOffsetX": this.data.weatherOffsetX,
+              "weatherOffsetY": this.data.weatherOffsetY,
+            }
+          )
+        })
+      } catch (e) {
+        wx.showToast({ title: '错误', icon: 'error' })
+        console.error(e)
+      }
+    },
+    async saveDeviceParams() {
+      var json = {
+        "clockPosition": this.data.clockPosition || '',
+        "clockOffsetX": this.data.clockOffsetX || '0',
+        "clockOffsetY": this.data.clockOffsetY || '0',
+        "clockColor": this.data.clockColor || '',
+        "clockFontValue": this.data.clockFontValue || '',
+        "weatherPosition": this.data.weatherPositionValue || '',
+        "weatherSpacing": this.data.weatherSpacingValue || '0',
+        "weatherOffsetX": this.data.weatherOffsetX || '0',
+        "weatherOffsetY": this.data.weatherOffsetY || '0',
+        "weatherRegion": this.data.weatherRegionModeValue === 'manual'
+          ? (this.data.weatherRegion || this.data.weatherRegionCity || '')
+          : 'auto',
+        "switchInterval": this.data.switchIntervalValue || '',
+        "switchMode": this.data.switchModeValue || '',
+        "localMusicEnd": this.data.localMusicEndValue || '',
+        "musicDuring": this.data.musicDuringValue || '',
+        "screenOffTime": this.data.screenOffTimeValue || '',
+        "autoPowerOff": this.data.autoPowerOffValue || ''
+      }
+      try {
+        console.log('params_json: ', json)
+        await Api.device.executeMcpTools(this.data.deviceId, 'self.device_params.set', { params_json: JSON.stringify(json) })
+      } catch (e) {
+        wx.showToast({ title: '错误', icon: 'error' })
+        console.error(e)
+      }
+
+
+    },
+    async requestDeviceParams() {
+      const data = await Api.device.executeMcpTools(this.data.deviceId, 'self.device_params.get')
+      const raw = JSON.parse(data).data.content[0].text
+      const params = JSON.parse(raw || '{}')
+      console.log('geted params: ', params)
+
+      // const clockFontLabel = this.getClockFontLabelByValue(params.clockFont || '')
+      const weatherPositionLabel = this.getWeatherPositionLabelByValue(params.weatherPosition || '')
+
+      const switchIntervalLabel = this.getSimplePickerLabelByValue(this.data.switchIntervalOptions, params.switchInterval || '')
+      const switchModeLabel = this.getSimplePickerLabelByValue(this.data.switchModeOptions, params.switchMode || '')
+      const localMusicEndLabel = this.getSimplePickerLabelByValue(this.data.localMusicEndOptions, params.localMusicEnd || '')
+      const musicDuringLabel = this.getSimplePickerLabelByValue(this.data.musicDuringOptions, params.musicDuring || '')
+      const screenOffTimeLabel = this.getSimplePickerLabelByValue(this.data.screenOffTimeOptions, params.screenOffTime || '')
+      const autoPowerOffLabel = this.getSimplePickerLabelByValue(this.data.autoPowerOffOptions, params.autoPowerOff || '')
+
+      const weatherRegionRaw = params.weatherRegion || ''
+      const weatherRegionParts = typeof weatherRegionRaw === 'string' && weatherRegionRaw.includes('|')
+        ? weatherRegionRaw.split('|')
+        : []
+      const weatherRegionCity = weatherRegionParts[2] || weatherRegionParts[1] || weatherRegionParts[0] || (weatherRegionRaw !== 'auto' ? weatherRegionRaw : '')
+
+      this.setData({
+        clockPosition: params.clockPosition || '',
+        clockOffsetX: params.clockOffsetX || '0',
+        clockOffsetY: params.clockOffsetY || '0',
+        clockColor: params.clockColor || '',
+        clockFontValue: params.clockFontValue || '',
+        // clockFontLabel,
+
+        weatherPositionValue: params.weatherPosition || '',
+        weatherPositionLabel,
+        weatherSpacingValue: params.weatherSpacing || '0',
+        weatherOffsetX: params.weatherOffsetX || '0',
+        weatherOffsetY: params.weatherOffsetY || '0',
+        weatherRegion: weatherRegionRaw,
+        weatherRegionModeValue: (weatherRegionRaw && weatherRegionRaw !== 'auto') ? 'manual' : 'auto',
+        weatherRegionModeLabel: (weatherRegionRaw && weatherRegionRaw !== 'auto') ? '手动' : '自动',
+        weatherRegionCity,
+        weatherRegionRegionValue: weatherRegionParts.length === 3 ? weatherRegionParts : ['', '', ''],
+
+        switchIntervalValue: params.switchInterval || '',
+        switchIntervalLabel,
+        switchModeValue: params.switchMode || '',
+        switchModeLabel,
+        localMusicEndValue: params.localMusicEnd || '',
+        localMusicEndLabel,
+        musicDuringValue: params.musicDuring || '',
+        musicDuringLabel,
+        screenOffTimeValue: params.screenOffTime || '',
+        screenOffTimeLabel,
+        autoPowerOffValue: params.autoPowerOff || '',
+        autoPowerOffLabel,
+
+        // sync temps
+        tempClockPosition: params.clockPosition || '',
+        tempClockOffsetX: params.clockOffsetX || '0',
+        tempClockOffsetY: params.clockOffsetY || '0',
+        tempWeatherPositionValue: params.weatherPosition || '',
+        tempWeatherPositionLabel: weatherPositionLabel,
+        tempWeatherSpacingValue: params.weatherSpacing || '0',
+        tempWeatherOffsetX: params.weatherOffsetX || '0',
+        tempWeatherOffsetY: params.weatherOffsetY || '0',
+      })
+    },
+
     showDialog(e: any) {
       const { key } = e.currentTarget.dataset;
       if (key === 'showWeatherDisplayDialog') {
         const positionValue = this.data.weatherPositionValue || this.data.weatherPositionOptions[0]?.value || ''
         const positionLabel = this.data.weatherPositionLabel || this.getWeatherPositionLabelByValue(positionValue)
-        const spacingValue = this.data.weatherSpacingValue ?? 0
+        const spacingValue = this.data.weatherSpacingValue || '0'
         this.setData({
           tempWeatherPositionValue: positionValue,
           tempWeatherPositionLabel: positionLabel,
@@ -185,6 +320,7 @@ Component({
         clockOffsetX: this.data.tempClockOffsetX,
         clockOffsetY: this.data.tempClockOffsetY
       })
+      this.sendPreviewCommand()
     },
     cancelClockPosition() {
       this.closeDialog()
@@ -202,6 +338,7 @@ Component({
     confirmClockColor() {
       this.closeDialog()
       this.setData({ clockColor: this.data.tempClockColor })
+      this.sendPreviewCommand()
     },
     cancelClockColor() {
       this.closeDialog()
@@ -243,7 +380,7 @@ Component({
       })
     },
     onWeatherSpacingTap(e: any) {
-      const value = e.currentTarget.dataset.value
+      const value = String(e.currentTarget.dataset.value)
       this.setData({ tempWeatherSpacingValue: value })
     },
     onWeatherOffsetX(e: any) {
@@ -260,6 +397,15 @@ Component({
       }
       this.setData({ tempWeatherOffsetY: value });
     },
+    onWeatherRegionCityChange(e: any) {
+      const regionValue = e?.detail?.value || []
+      const city = regionValue[2] || regionValue[1] || regionValue[0] || ''
+      this.setData({
+        weatherRegionRegionValue: regionValue,
+        weatherRegionCity: city,
+        weatherRegion: regionValue.join('|'),
+      })
+    },
     confirmWeatherDisplay() {
       this.closeDialog()
       this.setData({
@@ -269,6 +415,7 @@ Component({
         weatherOffsetX: this.data.tempWeatherOffsetX,
         weatherOffsetY: this.data.tempWeatherOffsetY,
       })
+      this.sendPreviewCommand()
     },
     cancelWeatherDisplay() {
       this.closeDialog()
@@ -295,15 +442,32 @@ Component({
       const data = this.data as Record<string, any>
       const value = e?.detail?.value?.[0] ?? data[`${key}Value`]
       const label = e?.detail?.label?.[0] ?? this.getSimplePickerLabelByValue(data[`${key}Options`], value)
-      this.setData({
+      const nextData: Record<string, any> = {
         [`${key}PickerVisible`]: false,
         [`${key}Value`]: value,
         [`${key}Label`]: label,
-      })
+      }
+      if (key === 'weatherRegionMode') {
+        if (value === 'auto') {
+          nextData.weatherRegion = 'auto'
+          nextData.weatherRegionCity = ''
+          nextData.weatherRegionRegionValue = ['', '', '']
+        } else {
+          nextData.weatherRegion = this.data.weatherRegion || this.data.weatherRegionCity || ''
+        }
+      }
+      this.setData(nextData)
     },
     onSimplePickerCancel(e: any) {
       const { key } = e.currentTarget.dataset
       this.setData({ [`${key}PickerVisible`]: false })
+    },
+
+    onWallpaperSelect() {
+      wx.navigateTo({
+        url: `/pages/wallpaperManager/index?deviceId=${this.data.deviceId}`
+      })
+
     }
   }
 })

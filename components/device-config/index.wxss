@@ -219,3 +219,7 @@
 .clock-grid {
   --td-grid-item-padding: 0rpx;
 }
+
+.full-width-button {
+  margin: 32rpx;
+}

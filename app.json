@@ -5,7 +5,8 @@
     "pages/my/index",
     "pages/blufiSearch/index",
     "pages/blufiDevice/index",
-    "pages/agentConfig/index"
+    "pages/agentConfig/index",
+    "pages/wallpaperManager/index"
   ],
   "usingComponents": {
     "t-toast": "tdesign-miniprogram/toast/toast"

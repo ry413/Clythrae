@@ -141,4 +141,29 @@ export interface PluginDefinition {
   updateDate: string
   creator: string
   createDate: string
-  [key: string]: any}
+  [key: string]: any
+}
+
+export interface DeviceEntity {
+  id: string
+  userId: string
+  macAddress: string
+  lastConnectedAt: string
+  autoUpdate: string
+  board: string
+  alias: string
+  agentId: string
+  appVersion: string
+  sort: string
+  updater: string
+  updateDate: string
+  creator: string
+  createDate: string
+  wallpaperIds: string
+}
+
+export interface WallpaperDTO {
+  id: number
+  fileKey: string
+  isBuiltin: boolean | number
+}
